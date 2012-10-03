@@ -1,5 +1,1 @@
-let g:blahdiblah = "Blaaahg"
-
-function! FindGemfile()
-  return "hello"
-endfunction
+let g:plugin_location = expand("<sfile>:h")
