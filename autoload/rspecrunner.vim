@@ -17,3 +17,7 @@ function! rspecrunner#FormatterClass(formatter_path)
   let l:sed_search_and_replace = '"s/^.*class\s\+\([A-Za-z]\+\).*/\1/"'
   return system("grep 'class Vim' ".a:formatter_path." | sed -e ".l:sed_search_and_replace)
 endfunction
+
+function! rspecrunner#SpecFilePath()
+  return expand("%:p")
+endfunction
