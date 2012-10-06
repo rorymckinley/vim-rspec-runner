@@ -17,8 +17,8 @@ module RSpec
         private :flatten
 
         def extract_path(backtrace)
-          calling_file = backtrace.find { |line| line =~ /_spec\.rb/ }
-          format_caller calling_file
+          calling_file = backtrace.find { |line| line =~ /^(.*_spec\.rb:.*):in/ }
+          $1
         end
         private :extract_path
       end
