@@ -12,7 +12,7 @@ module RSpec
         end
 
         def flatten(message)
-          message.split("\n").join(" ")
+          (message.split("\n").map { |part| part.strip }).join(" ")
         end
         private :flatten
 

@@ -25,4 +25,11 @@ describe RSpec::Core::Formatters::VimQuickfixFormatter do
 
     formatter.example_failed(failed_example)
   end
+
+  it "trims off any whitespace around the message components" do
+    exception.stub!(:message).and_return("A   \n    Padded\nMessage")
+    io.should_receive(:puts).with(/A Padded Message/)
+
+    formatter.example_failed(failed_example)
+  end
 end
