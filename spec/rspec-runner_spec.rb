@@ -1,6 +1,15 @@
 require 'vimrunner'
 require 'tempfile'
 
+def specs_run
+  parsed_quickfix_list.last['text'] =~ /(\d+) example/
+  $1.to_i
+end
+
+def parsed_quickfix_list
+  eval(@vim.command("echo getqflist()").gsub(/:/, "=>"))
+end
+
 describe "spec runner plugin" do
   let (:path_to_plugin) { File.expand_path(File.join(File.dirname(__FILE__), '..')) }
   let (:path_to_formatter) { File.expand_path(File.join(path_to_plugin, 'plugin', 'formatter', 'vim_quickfix_formatter.rb')) }
@@ -47,12 +56,32 @@ describe "spec runner plugin" do
   it "returns the command to be run to execute all specs in a file" do
     rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} #{spec_file.path}"
     @vim.edit(spec_file.path)
-    @vim.command("echo rspecrunner#RspecCommand()").should eq rspec_command
+    @vim.command('echo rspecrunner#RspecCommand("file")').should eq rspec_command
   end
 
   it "runs all the specs in the file in a quickfix list" do
     @vim.edit(spec_file.path)
     @vim.command("call rspecrunner#RunSpecsFile()")
-    @vim.command("echo getqflist()").should_not eq "[]"
+    specs_run.should eq 2
+  end
+
+  it "returns the line number of the current example" do
+    @vim.edit(spec_file.path)
+    @vim.normal("/fail!!<CR>")
+    @vim.command("echo rspecrunner#ExampleLineNumber()").should eq "2"
+  end
+
+  it "returns the command to be run to execute only the spec under cursor" do
+    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} #{spec_file.path}:2"
+    @vim.edit(spec_file.path)
+    @vim.normal("/fail!!<CR>")
+    @vim.command('echo rspecrunner#RspecCommand("example")').should eq rspec_command
+  end
+
+  it "runs the spec at the specified file number" do
+    @vim.edit(spec_file.path)
+    @vim.normal("/fail!!<CR>")
+    @vim.command("call rspecrunner#RunSpecsExample()")
+    specs_run.should eq 1
   end
 end

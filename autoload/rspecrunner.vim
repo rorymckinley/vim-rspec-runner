@@ -21,17 +21,27 @@ function! rspecrunner#SpecFilePath()
   return expand("%:p")
 endfunction
 
-function! rspecrunner#RspecCommand()
+function! rspecrunner#ExampleLineNumber()
+  return line(".")
+endfunction
+
+function! rspecrunner#RspecCommand(run_type)
   let l:version = rspecrunner#RspecVersion()
   let l:executable = (l:version ==? "2.x" ? "rspec" : "spec")
   let l:formatter_path = rspecrunner#PathToFormatter(l:version)
   let l:formatter_class = rspecrunner#FormatterClass(l:version)
   let l:spec_file_path = rspecrunner#SpecFilePath()
+  let l:line_number = (a:run_type ==? "example" ? ":".rspecrunner#ExampleLineNumber() : "")
 
-  return "bundle exec ".l:executable." -r ".l:formatter_path." -f ".l:formatter_class." ".l:spec_file_path
+  return "bundle exec ".l:executable." -r ".l:formatter_path." -f ".l:formatter_class." ".l:spec_file_path.l:line_number
 endfunction
 
 function! rspecrunner#RunSpecsFile()
-  cexpr system(rspecrunner#RspecCommand())
+  cexpr system(rspecrunner#RspecCommand("file"))
+  copen
+endfunction
+
+function! rspecrunner#RunSpecsExample()
+  cexpr system(rspecrunner#RspecCommand("example"))
   copen
 endfunction
