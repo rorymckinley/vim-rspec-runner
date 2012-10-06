@@ -9,7 +9,7 @@ function! rspecrunner#PathToFormatter(version)
 endfunction
 
 function! rspecrunner#RspecVersion()
-  system("bundle list | grep 'rspec (2'")
+  let l:nil = system("bundle list | grep 'rspec (2'")
   return v:shell_error == 0 ? "2.x" : "1.x"
 endfunction
 
@@ -32,5 +32,6 @@ function! rspecrunner#RspecCommand()
 endfunction
 
 function! rspecrunner#RunSpecsFile()
-  cgetexpr system(rspecrunner#RspecCommand())
+  cexpr system(rspecrunner#RspecCommand())
+  copen
 endfunction
