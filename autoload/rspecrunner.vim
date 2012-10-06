@@ -14,7 +14,7 @@ function! rspecrunner#RspecVersion()
 endfunction
 
 function! rspecrunner#FormatterClass(version)
-  return "Rspec::Core::Formatters::VimQuickfixFormatter"
+  return "RSpec::Core::Formatters::VimQuickfixFormatter"
 endfunction
 
 function! rspecrunner#SpecFilePath()
@@ -29,4 +29,8 @@ function! rspecrunner#RspecCommand()
   let l:spec_file_path = rspecrunner#SpecFilePath()
 
   return "bundle exec ".l:executable." -r ".l:formatter_path." -f ".l:formatter_class." ".l:spec_file_path
+endfunction
+
+function! rspecrunner#RunSpecsFile()
+  cgetexpr system(rspecrunner#RspecCommand())
 endfunction

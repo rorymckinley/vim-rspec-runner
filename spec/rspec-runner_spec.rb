@@ -1,8 +1,18 @@
 require 'vimrunner'
+require 'tempfile'
 
 describe "spec runner plugin" do
   let (:path_to_plugin) { File.expand_path(File.join(File.dirname(__FILE__), '..')) }
   let (:path_to_formatter) { File.expand_path(File.join(path_to_plugin, 'plugin', 'formatter', 'vim_quickfix_formatter.rb')) }
+  let (:path_to_sample_spec) { File.expand_path(File.join(File.dirname(__FILE__), 'fixtures', 'spec_sample.rb')) }
+  let (:spec_file) {
+    f = Tempfile.new("vim-rspec-runner")
+    f.write(IO.read(path_to_sample_spec))
+    f.close
+    f
+  }
+  let (:formatter_class) { "RSpec::Core::Formatters::VimQuickfixFormatter" }
+
   before(:all) do
     @vim = Vimrunner.start
     @vim.add_plugin(path_to_plugin, 'plugin/rspec-runner.vim')
@@ -10,6 +20,7 @@ describe "spec runner plugin" do
 
   after(:all) do
     @vim.kill
+    spec_file.unlink
   end
 
   it "returns the path to the file containing the custom formatter for the relevant version of Rspec" do
@@ -20,7 +31,7 @@ describe "spec runner plugin" do
   end
 
   it "returns the namespaced class of the selected formatter for the relevant version of Rspec" do
-    @vim.command(%Q{echo rspecrunner#FormatterClass("2.x")}).should eq "Rspec::Core::Formatters::VimQuickfixFormatter"
+    @vim.command(%Q{echo rspecrunner#FormatterClass("2.x")}).should eq "RSpec::Core::Formatters::VimQuickfixFormatter"
   end
 
   it "returns the current version of Rspec" do
@@ -29,18 +40,19 @@ describe "spec runner plugin" do
   end
 
   it "returns the name of the spec file to be run" do
-    require 'tempfile'
-    file = Tempfile.new('vim-rspec-runner')
-    @vim.edit(file.path)
-    @vim.command("echo rspecrunner#SpecFilePath()").should eq file.path
-    file.unlink
+    @vim.edit(spec_file.path)
+    @vim.command("echo rspecrunner#SpecFilePath()").should eq spec_file.path
   end
 
   it "returns the command to be run to execute all specs in a file" do
-    require 'tempfile'
-    file = Tempfile.new('vim-rspec-runner')
-    @vim.edit(file.path)
-    @vim.command("echo rspecrunner#RspecCommand()").should eq "bundle exec rspec -r #{path_to_formatter} -f Rspec::Core::Formatters::VimQuickfixFormatter #{file.path}"
-    file.unlink
+    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} #{spec_file.path}"
+    @vim.edit(spec_file.path)
+    @vim.command("echo rspecrunner#RspecCommand()").should eq rspec_command
+  end
+
+  it "runs all the specs in the file in a quickfix list" do
+    @vim.edit(spec_file.path)
+    @vim.command("call rspecrunner#RunSpecsFile()")
+    @vim.command("echo getqflist()").should_not eq "[]"
   end
 end

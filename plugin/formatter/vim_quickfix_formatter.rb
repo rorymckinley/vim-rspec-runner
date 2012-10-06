@@ -1,6 +1,6 @@
 require 'rspec/core/formatters/base_text_formatter'
 
-module Rspec
+module RSpec
   module Core
     module Formatters
       class VimQuickfixFormatter < BaseTextFormatter
