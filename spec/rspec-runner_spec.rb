@@ -13,12 +13,12 @@ describe "spec runner plugin" do
   }
   let (:formatter_class) { "RSpec::Core::Formatters::VimQuickfixFormatter" }
 
-  before(:all) do
+  before(:each) do
     @vim = Vimrunner.start
     @vim.add_plugin(path_to_plugin, 'plugin/rspec-runner.vim')
   end
 
-  after(:all) do
+  after(:each) do
     @vim.kill
     spec_file.unlink
   end
