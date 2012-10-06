@@ -8,16 +8,25 @@ function! rspecrunner#PathToFormatter(version)
   return l:base . l:format_file
 endfunction
 
-function! rspecrunner#GetExecutable()
+function! rspecrunner#RspecVersion()
   system("bundle list | grep 'rspec (2'")
   return v:shell_error == 0 ? "2.x" : "1.x"
 endfunction
 
-function! rspecrunner#FormatterClass(formatter_path)
-  let l:sed_search_and_replace = '"s/^.*class\s\+\([A-Za-z]\+\).*/\1/"'
-  return system("grep 'class Vim' ".a:formatter_path." | sed -e ".l:sed_search_and_replace)
+function! rspecrunner#FormatterClass(version)
+  return "Rspec::Core::Formatters::VimQuickfixFormatter"
 endfunction
 
 function! rspecrunner#SpecFilePath()
   return expand("%:p")
+endfunction
+
+function! rspecrunner#RspecCommand()
+  let l:version = rspecrunner#RspecVersion()
+  let l:executable = (l:version ==? "2.x" ? "rspec" : "spec")
+  let l:formatter_path = rspecrunner#PathToFormatter(l:version)
+  let l:formatter_class = rspecrunner#FormatterClass(l:version)
+  let l:spec_file_path = rspecrunner#SpecFilePath()
+
+  return "bundle exec ".l:executable." -r ".l:formatter_path." -f ".l:formatter_class." ".l:spec_file_path
 endfunction

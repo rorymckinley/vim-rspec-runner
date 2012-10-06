@@ -19,13 +19,13 @@ describe "spec runner plugin" do
     @vim.command('echo rspecrunner#PathToFormatter("1.x")').should eq path_to_rspec_1_formatter
   end
 
-  it "returns the class of the selected formatter" do
-    @vim.command(%Q{echo rspecrunner#FormatterClass("#{path_to_formatter}")}).should eq "VimQuickfixFormatter"
+  it "returns the namespaced class of the selected formatter for the relevant version of Rspec" do
+    @vim.command(%Q{echo rspecrunner#FormatterClass("2.x")}).should eq "Rspec::Core::Formatters::VimQuickfixFormatter"
   end
 
   it "returns the current version of Rspec" do
     # TODO: before you're done figure out if you want this to be more granular - e.g. rspec 1 checks
-    @vim.command("echo rspecrunner#GetExecutable()").should eq "2.x"
+    @vim.command("echo rspecrunner#RspecVersion()").should eq "2.x"
   end
 
   it "returns the name of the spec file to be run" do
@@ -33,6 +33,14 @@ describe "spec runner plugin" do
     file = Tempfile.new('vim-rspec-runner')
     @vim.edit(file.path)
     @vim.command("echo rspecrunner#SpecFilePath()").should eq file.path
+    file.unlink
+  end
+
+  it "returns the command to be run to execute all specs in a file" do
+    require 'tempfile'
+    file = Tempfile.new('vim-rspec-runner')
+    @vim.edit(file.path)
+    @vim.command("echo rspecrunner#RspecCommand()").should eq "bundle exec rspec -r #{path_to_formatter} -f Rspec::Core::Formatters::VimQuickfixFormatter #{file.path}"
     file.unlink
   end
 end
