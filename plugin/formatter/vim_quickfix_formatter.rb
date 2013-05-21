@@ -7,7 +7,6 @@ module RSpec
         def example_failed(example)
           message = example.execution_result[:exception].message
           backtrace = example.execution_result[:exception].backtrace
-
           output.puts "#{extract_path(backtrace)}: [FAIL] #{flatten(message)}"
         end
 

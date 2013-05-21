@@ -1,5 +1,6 @@
 require 'vimrunner'
 require 'tempfile'
+require 'letters'
 
 def specs_run
   parsed_quickfix_list.last['text'] =~ /(\d+) example/
@@ -22,12 +23,16 @@ describe "spec runner plugin" do
   }
   let (:formatter_class) { "RSpec::Core::Formatters::VimQuickfixFormatter" }
 
-  before(:each) do
+  before(:all) do
+    p = IO.popen(["gvim", "--version"])
+    i = p.readlines
+    File.open('/tmp/rory.out', 'w') { |f| f.write(i) }
+    p.close
     @vim = Vimrunner.start
     @vim.add_plugin(path_to_plugin, 'plugin/rspec-runner.vim')
   end
 
-  after(:each) do
+  after(:all) do
     @vim.kill
     spec_file.unlink
   end
@@ -54,7 +59,7 @@ describe "spec runner plugin" do
   end
 
   it "returns the command to be run to execute all specs in a file" do
-    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} #{spec_file.path}"
+    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} -o ~/.last-rspec -f p #{spec_file.path}"
     @vim.edit(spec_file.path)
     @vim.command('echo rspecrunner#RspecCommand("file")').should eq rspec_command
   end
@@ -72,7 +77,7 @@ describe "spec runner plugin" do
   end
 
   it "returns the command to be run to execute only the spec under cursor" do
-    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} #{spec_file.path}:2"
+    rspec_command = "bundle exec rspec -r #{path_to_formatter} -f #{formatter_class} -o ~/.last-rspec -f p #{spec_file.path}:2"
     @vim.edit(spec_file.path)
     @vim.normal("/fail!!<CR>")
     @vim.command('echo rspecrunner#RspecCommand("example")').should eq rspec_command

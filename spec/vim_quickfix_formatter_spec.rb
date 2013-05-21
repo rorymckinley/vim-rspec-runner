@@ -32,8 +32,4 @@ describe RSpec::Core::Formatters::VimQuickfixFormatter do
 
     formatter.example_failed(failed_example)
   end
-
-  it "nonsense" do
-    false.should eq true
-  end
 end
